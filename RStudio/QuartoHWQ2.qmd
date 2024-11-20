@@ -1,0 +1,37 @@
+---
+title: "Quarto Homework Q2"
+subtitle: "STAT 184"
+author: "Gianna DeLorenzo"
+date: 11-20-2024
+format: html
+editor: visual
+---
+
+## Question 2
+
+```{r, echo=TRUE, eval=TRUE}
+#Load necessary libraries
+library(dplyr)
+
+#Import the diamonds dataset
+data(diamonds)
+
+#Take a sample of the dataset
+diamonds_sample <- sample_n(diamonds, 5000)
+
+#Create the plot
+diamonds_aesthetics <- ggplot(diamonds_sample,
+                              aes(x = carat, 
+                                  y = price, 
+                                  color = cut)) + 
+  geom_point(alpha = 0.4) + #Reduced alpha and smaller data points
+  geom_smooth(se = FALSE, method = "lm", linetype = "dashed") +
+  labs(x = "Carat",
+       y = "Price",
+       title = "Diamonds Data Visualization",
+       caption = "Source: Diamonds dataset from ggplot2") +
+  theme_minimal() #Polished look of visualization
+
+#Display the visualization
+diamonds_aesthetics
+```

@@ -1,0 +1,220 @@
+---
+title: "Quarto Homework"
+subtitle: "STAT 184"
+author: "Gianna DeLorenzo"
+date: 11-20-2024
+format: html
+editor: visual
+self-contained: true
+---
+
+## Question 1
+
+```{r, echo=FALSE}
+## dependencies
+library(ggplot2)
+myFunction <- function(x){
+  y <- (cos(4*x) + tan(0.5*x))^4
+  return(y)
+}
+
+ggplot() +
+  stat_function(
+    fun = myFunction,
+    xlim = c(0, 1),
+    n = 1000
+  ) +
+  theme_bw() +
+  labs(
+    x = "x",
+    y = "h(x)"
+  )
+```
+
+## Question 2
+
+```{r, echo=TRUE, eval=TRUE}
+#Load necessary libraries
+library(dplyr)
+
+#Import the diamonds dataset
+data(diamonds)
+
+#Take a sample of the dataset
+diamonds_sample <- sample_n(diamonds, 5000)
+
+#Create the plot
+diamonds_aesthetics <- ggplot(diamonds_sample,
+                              aes(x = carat, 
+                                  y = price, 
+                                  color = cut)) + 
+  geom_point(alpha = 0.4) + #Reduced alpha and smaller data points
+  geom_smooth(se = FALSE, method = "lm", linetype = "dashed") +
+  labs(x = "Carat",
+       y = "Price",
+       title = "Diamonds Data Visualization",
+       caption = "Source: Diamonds dataset from ggplot2") +
+  theme_minimal() #Polished look of visualization
+
+#Display the visualization
+diamonds_aesthetics
+```
+
+## Question 3
+
+**Data includes 6 states bordering the U.S. including:**
+
+-   Baja California
+
+-   Sonora
+
+-   Chihuahua
+
+-   Coahuila
+
+-   Nuevo León
+
+-   Tamaulipas
+
+```{r}
+
+#Load necessary libraries
+library(dplyr)
+library(ggplot2)
+library(knitr)
+
+#Import tortilla data csv file
+tortilla_prices_data <- read.csv("/Users/giannadelorenzo/Downloads/STAT 184/tortilla_data.csv")
+```
+
+**Task A:** Find average price of tortillas across all 6 states together for the year 2007.
+
+```{r}
+#Average price for 2007
+avg_price_2007 <- tortilla_prices_data %>%
+  filter(year == 2007) %>% #Filters for year 2007
+  summarise(
+    avg_price = mean(price, na.rm = TRUE) #Gets average of price column and filters missing data
+  )
+avg_price_2007
+  
+```
+
+**Task B:** Find the average price of tortillas across all 6 states together for the year 2024.
+
+```{r}
+#Average price for 2024
+avg_price_2024 <- tortilla_prices_data %>%
+  filter(year == 2024) %>% #Filters for year 2024
+  summarise(
+    avg_price = mean(price, na.rm = TRUE) #Gets average of price column and filters missing data
+  )
+avg_price_2024
+```
+
+**Task C:** Find the percent change in the average price of tortillas across all 6 states together from the year 2007 to 2024.
+
+```{r}
+#Calculate the percent change in the average price from 2007 to 2024
+avg_price_percent_change <- ((avg_price_2024$avg_price - avg_price_2007$avg_price) / avg_price_2007$avg_price) * 100
+avg_price_percent_change
+```
+
+**Task D:** Make a plot that shows the average price of tortillas (across all 6 states together) each year from the years 2007 to 2024.
+
+```{r}
+#Average price each year from 2007 to 2024
+avg_price_plot <- tortilla_prices_data %>%
+  group_by(year) %>%
+  summarise(
+    avg_price = mean(price, na.rm = TRUE)
+  )
+
+#Create the visualization
+ggplot(avg_price_plot, 
+       aes(x = year,
+           y = avg_price)) +
+  geom_line(color = "blue") +
+  geom_point() +
+  labs(x = "Year",
+       y = "Average Price",
+       title = "Average price of Tortillas each year from 2007 to 2024") +
+  theme_minimal() 
+
+```
+
+**Task E:** For the year 2016, provide summary statistics for each of the six states’ price of tortillas. Make a table of the average price of tortillas in each state in 2016. Also make side-by-side boxplots for each state in 2016.
+
+```{r}
+#Summary Statistics
+summary_statistics <- tortilla_prices_data %>%
+  filter(year == 2016) %>% #Filter for year 2016
+  group_by(state) %>% 
+  summarise(
+    count = n(),
+    sample_minimum = min(price, na.rm = TRUE), 
+    first_quartile = quantile(price, probs = 0.25, na.rm = TRUE),
+    sample_median = median(price, na.rm = TRUE), 
+    third_quartile = quantile(price, probs = 0.75, na.rm = TRUE), 
+    sample_maximum = max(price, na.rm = TRUE), 
+    median_abs_deviation = mad(price, na.rm = TRUE), 
+    mean = mean(price, na.rm = TRUE), 
+    std = sd(price, na.rm = TRUE)
+  )
+
+#Display the Summary Statistics in a table
+kable(summary_statistics, caption = "Summary Statistics for 2016")
+
+#Table of average price of tortillas in 2016
+avg_price_table <- tortilla_prices_data %>%
+  filter(year == 2016) %>%
+  group_by(state) %>%
+  summarise(
+    avg_price = mean(price, na.rm = TRUE)
+  )
+kable(avg_price_table, caption = "Average Price of Tortillas in 2016")
+
+#Boxplots for each state in 2016
+ggplot(tortilla_prices_data %>%
+         filter(year == 2016), aes(x = state,
+                                   y = price)) +
+  geom_boxplot() +
+  labs(
+    x = "State",
+    y = "Price",
+    title = "Tortilla Prices by State in 2016",
+    caption = "Source: Kaggle Tortilla Dataset"
+  ) +
+  theme_minimal()
+  
+```
+
+**Task F:** For the state of Nuevo León, make an overlapping plot of the price of tortillas each year from 2007 to 2024 based on store type
+
+```{r}
+#Filter data for Nuevo León
+nuevo_leon_plot <- tortilla_prices_data %>%
+  filter(state == "NuevoLeon") 
+
+# Create overlapping plot
+ggplot(nuevo_leon_plot, aes(x = year,
+                            y = price,
+                            group = storeType,
+                            color = storeType)) +
+  geom_line(alpha = 0.5) +
+  geom_point() +
+  labs(
+    x = "Year",
+    y = "Price",
+    title = "Price of Tortillas each year from 2007 to 2024 by Store Type",
+    caption = "Store Types: Mom and Pop Store vs. Big Retail Store"
+  ) +
+  theme_minimal()
+```
+
+**Task G:** Image of Tortilla
+
+```{r, fig.cap="https://www.laboiteny.com/cdn/shop/articles/Flour_Tortilla_SQ_600x.jpg?v=1660671209"}
+#Prints image of a tortilla
+include_graphics("/Users/giannadelorenzo/Downloads/STAT 184/Flour_Tortilla_SQ_600x.jpg")
+```
